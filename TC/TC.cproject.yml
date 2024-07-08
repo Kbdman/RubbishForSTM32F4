@@ -1,0 +1,22 @@
+# A project translates into one executable or library.
+project:
+
+  groups:
+    - group: Source Files
+      files:
+        - file: ./main.c
+
+  # List components to use for your application.
+  # A software component is a re-usable unit that may be configurable.
+  components:
+    - component: ARM::CMSIS:CORE
+    - component: Device:Startup
+    - component: Keil::Device:STM32Cube HAL:GPIO
+    - component: Keil::Device:STM32Cube HAL:RCC@1.8.1
+    - component: Keil::Device:STM32Cube HAL:Cortex
+    - component: Keil::Device:STM32Cube HAL:PWR@1.8.1
+    - component: Keil::Device:STM32Cube HAL:Common
+    - component: Keil::Device:STM32Cube Framework:Classic@1.8.1
+    - component: Keil::Device:STM32Cube HAL:EXTI
+  packs:
+    - pack: Keil::STM32F4xx_DFP@2.17.1
