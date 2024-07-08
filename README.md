@@ -8,7 +8,7 @@ The hardware target is a STM32F407ZGT
 Most files in RTE folder are copied from some CMSIS packages by "CMSIS Solution" extension automatically.       
 It's quite convenient that all I need to do is toggling the library which I need by clicking mouse.
 
-### c
+### link script
 gcc_linker_script.ld.src  is the template for link script. It was also copied  or created by extensions.        
 I don't remember if I have edited it.
 Seems I defined some symbol which are referred by this startup file.
@@ -36,7 +36,7 @@ SECTIONS
 It specifies where a section is localted in the target file by Load address and where the section is after it being loaded into memory by VMA.
 The code referring the resource in section will be linked to the VMA of the resource
 Refer to https://ftp.gnu.org/old-gnu/Manuals/ld-2.9.1/html_chapter/ld_3.html for more information       
-### Why AT
+#### Why AT
 If we do not use the AT , the load address will be same to the VMA.     
 But sometimes we do not want this.      
 For example ,       
@@ -53,7 +53,7 @@ Seems only the main.c is totally managed by myself. It contains the functions wr
 ## Startup.
 When STM32F4 boots(not pefectly correct), the flash which at 0x8000000 will be mapped to 0x0.        
 The the CPU will load a vector which starts at 0x0.      
-The first 4 bytes are used to specify the top of stack, and the second 4 bytes are used to specify the start address for execution.
-In this project then start address is pointed to Reset_Handler which implemented in startup_xxxxxx.S.
-It do some initialization , like copy initialized global data from flash to RAM, then call the main function implemented  in main.c
+The first 4 bytes are used to specify the top of stack, and the second 4 bytes are used to specify the start address for execution.     
+In this project then start address is pointed to Reset_Handler which implemented in startup_xxxxxx.S.       
+It do some initialization , like copy initialized global data from flash to RAM, then call the main function implemented  in main.c     
  
