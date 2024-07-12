@@ -1,5 +1,6 @@
 #include "RTE_Components.h"
 #include "stm32f407xx.h"
+#include "system_stm32f4xx.h"
 #include CMSIS_device_header
 int i=0x256;
 int flag=0;
@@ -49,21 +50,20 @@ int checkPD9()
 }
 void EXTI1_IRQHandler()
 {
-    
-    if((EXTI->PR& EXTI_PR_PR1)!=RESET)
-    {
-        EXTI->PR=EXTI_PR_PR1;
+
+}
+void SysTick_Handler()
+{
         flag++;
         if(flag%2==0)
             delight();
         else
             toff();
-    }
 }
-
 void initNVIC()
 {
     HAL_NVIC_EnableIRQ(EXTI1_IRQn);
+
 }
 int main() {
     
@@ -74,6 +74,8 @@ int main() {
     InitPB1();
     //InitEXTI();
     initNVIC();
+    HAL_SYSTICK_Config(SystemCoreClock/20);
+    HAL_NVIC_EnableIRQ(SysTick_IRQn);
 /*
 
 
