@@ -1,7 +1,6 @@
 #include "RTE_Components.h"
 #include "stm32f407xx.h"
 #include "system_stm32f4xx.h"
-#include <stdint.h>
 #include CMSIS_device_header
 int i=0x256;
 int flag=0;
@@ -136,8 +135,11 @@ void initUSART1()
     setGPIOMode(GPIOB,7, 0b10);
     setGPIOAF(GPIOB, 6, 0x7);
     setGPIOAF(GPIOB, 7, 0x7);
-    //Enable interrpution when A
-    USART1->BRR=0x30D;
+    //Here we didn't setup any system timer. so the frequency of APB2 is 16000000
+    //if we want set baud rate to 115200 with 16x overstamping
+    //the num in BRR should be like 8.6805(16000000/115200/16)
+    //So the Mantissa should be 0d8,and Fraction should be 11 (11/16)
+    USART1->BRR=0x8B;
     //ENABLE USART ,transmitter,interuption for TXE
     USART1->CR1|=USART_CR1_TXEIE|USART_CR1_UE|USART_CR1_TE;
     HAL_NVIC_EnableIRQ(USART1_IRQn);
@@ -145,10 +147,8 @@ void initUSART1()
 int main() {
     
     RCC->AHB1ENR|=RCC_AHB1ENR_GPIOGEN;
-    RCC->AHB1ENR|=RCC_AHB1ENR_GPIOBEN;
     RCC->APB2ENR|=RCC_APB2ENR_SYSCFGEN;
     InitPG6();
-    InitPB1();
     initUSART1();
     //InitEXTI();
     //initNVIC();
