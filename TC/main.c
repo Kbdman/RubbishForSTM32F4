@@ -108,18 +108,40 @@ void setGPIOMode(GPIO_TypeDef* gpio,uint8_t port,uint8_t mode)
 {
     gpio->MODER=clearBit(gpio->MODER,port*2,2)|(mode<<(port*2));
 }
-char data='A';
+/**
+ * @brief send "ABCD....Z" out via USART1
+ * 
+ */
 void USART1_IRQHandler()
 {
+    static char data='A';
     if(USART1->SR&USART_SR_TXE)
     {
         USART1->DR=data;
-        data+=1;
-        if(data>'Z')
-        {
+        if(data=='\n')
             data='A';
+        else if(data=='Z')
+        {
+            data='\r';
+        }else if(data =='\r'){
+            data='\n';
+        }
+        else {
+            data++;
         }
     }
+}
+/**
+ * @brief output SystemClock onto MCO2
+ * 
+ */
+void setupMCO2()
+{
+    //MCO2 is AF0 of PC9
+    RCC->AHB1ENR|=RCC_AHB1ENR_GPIOCEN;
+    setGPIOMode(GPIOC,9, 0b10);
+    setGPIOAF(GPIOC, 9, 0x0);
+    RCC->CFGR=clearBit(RCC->CFGR,30,2)|(0b00<<(30));
 }
 void initUSART1()
 {
@@ -149,6 +171,7 @@ int main() {
     RCC->AHB1ENR|=RCC_AHB1ENR_GPIOGEN;
     RCC->APB2ENR|=RCC_APB2ENR_SYSCFGEN;
     InitPG6();
+    setupMCO2();
     initUSART1();
     //InitEXTI();
     //initNVIC();
