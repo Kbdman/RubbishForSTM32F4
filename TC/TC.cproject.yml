@@ -5,6 +5,8 @@ project:
     - group: Source Files
       files:
         - file: ./main.c
+        - file: common.c
+        - file: common.h
 
   # List components to use for your application.
   # A software component is a re-usable unit that may be configurable.

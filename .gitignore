@@ -64,3 +64,4 @@ out
 *.cbuild.yml
 *.cbuild-idx.yml
 *.cbuild-set.yml
+.vscode/*
