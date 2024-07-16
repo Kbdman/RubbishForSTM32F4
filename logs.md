@@ -1,6 +1,9 @@
 
 # logs
 
+#### Tue Jul 16 10:19:33 PM CST 2024
+Implement a simple mechanism to log string via USART1       
+
 #### Mon Jul 15 09:41:27 PM CST 2024     
 The reason why I didn't make it last night is the incorrect baud rate  
 The USART1 is connected to APB2, it works at APB2's frequency.      
