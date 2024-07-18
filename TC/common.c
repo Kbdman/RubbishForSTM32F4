@@ -16,6 +16,13 @@ uint32_t clearBit(uint32_t data, uint8_t start, uint8_t len)
     data &= clearbits;
     return data;
 }
+uint32_t setBits(uint32_t data, uint8_t start, uint8_t len, uint8_t bits)
+{
+    if (bits > ((1 << len) - 1))
+        return data;
+    data = clearBit(data, start, len) | (bits << start);
+    return data;
+}
 /**
  * @brief select alternate function for a gpio port
  *
@@ -52,9 +59,9 @@ void USART1_IRQHandler()
 {
     if (USART1->SR & USART_SR_TXE)
     {
-            USART1->DR = buf[idx];
-            if(++idx==buflen)
-                HAL_NVIC_DisableIRQ(USART1_IRQn);
+        USART1->DR = buf[idx];
+        if (++idx == buflen)
+            HAL_NVIC_DisableIRQ(USART1_IRQn);
     }
 }
 void initUSART1()
@@ -102,7 +109,7 @@ void logBuf(const char *msg, uint32_t len)
     buf[1] = '\n';
     if (len > sizeof(buf) - 2)
         len = sizeof(buf) - 2;
-    Memcpy(buf+2, msg, len);
+    Memcpy(buf + 2, msg, len);
 
     buflen = len + 2;
     idx = 0;
@@ -111,4 +118,50 @@ void logBuf(const char *msg, uint32_t len)
 void logString(const char *msg)
 {
     logBuf(msg, Strlen(msg));
+}
+void DMAStreamSelectChannel(DMA_Stream_TypeDef *stream, uint8_t ch)
+{
+    if (ch > 7)
+        return;
+    stream->CR = clearBit(stream->CR, 0, 1);
+    stream->CR = setBits(stream->CR, 25, 3, ch);
+}
+void DMAStreamSetDirection(DMA_Stream_TypeDef *stream, uint8_t dir)
+{
+
+    stream->CR = clearBit(stream->CR, 0, 1);
+    stream->CR = setBits(stream->CR, 6, 2, dir);
+}
+void initDMA2S1ForM2M()
+{
+    RCC->AHB1ENR |= RCC_AHB1ENR_DMA2EN;                     // Enable DMA2
+    DMAStreamSelectChannel(DMA2_Stream1, 1);                // select channel
+    DMAStreamSetDirection(DMA2_Stream1, 2);                 // set direction "Memory to memory"
+    DMA2_Stream1->CR = setBits(DMA2_Stream1->CR, 10, 1, 1); // Dest Memory Address increases
+    DMA2_Stream1->CR = setBits(DMA2_Stream1->CR, 9, 1, 1);  // Src Memory Address increases
+    DMA2_Stream1->CR = setBits(DMA2_Stream1->CR, 13, 2, 0); // dest Memory Address increases by byte
+    DMA2_Stream1->CR = setBits(DMA2_Stream1->CR, 11, 2, 0); // souce Memory Address increases by byte
+    DMA2_Stream1->CR = setBits(DMA2_Stream1->CR, 4, 1, 1);  // enable interrupt for transfer complete
+}
+void DMA2_Stream1_IRQHandler()
+{
+    // Clear flag of transfer complete when A DMA finish
+
+    if (DMA2->LISR & (1 << 11))
+    {
+        DMA2->LIFCR |= 1 << 11;
+    }
+}
+
+void CopyViaDMA2(uint8_t *dst, const uint8_t *s, uint16_t size)
+{
+    // wait for uncompleted tranfer
+    while (DMA2_Stream1->CR & 1)
+        ;
+    // In Memory to Memory Mod PAR is register for source and M0AR is register for dest
+    DMA2_Stream1->PAR = (uint32_t)s;
+    DMA2_Stream1->M0AR = (uint32_t)dst;
+    DMA2_Stream1->NDTR = size;         // set the transfer size
+    NVIC_EnableIRQ(DMA2_Stream1_IRQn); // enable IRQN
+    DMA2_Stream1->CR |= 1;             // Start transfer
 }

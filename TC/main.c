@@ -6,7 +6,7 @@
 int i = 0x256;
 int flag = 0;
 const char *strs[3] = {"This is the first string",
-                       "Print the second", 
+                       "Print the second",
                        "This third string is a wish that I hope the WW3 will not happen in 2024"};
 void InitPG6()
 {
@@ -79,6 +79,8 @@ void setupMCO2()
     setGPIOAF(GPIOC, 9, 0x0);
     RCC->CFGR = clearBit(RCC->CFGR, 30, 2) | (0b00 << (30));
 }
+
+char bufdes[1024] = {0};
 int main()
 {
 
@@ -87,10 +89,11 @@ int main()
     InitPG6();
     setupMCO2();
     initUSART1();
-    // InitEXTI();
-    // initNVIC();
-    // HAL_SYSTICK_Config(SystemCoreClock/20);
-    // HAL_NVIC_EnableIRQ(SysTick_IRQn);
+    initDMA2S1ForM2M();
+    //  InitEXTI();
+    //  initNVIC();
+    //  HAL_SYSTICK_Config(SystemCoreClock/20);
+    //  HAL_NVIC_EnableIRQ(SysTick_IRQn);
     /*
 
 
@@ -108,14 +111,15 @@ int main()
 
         }
         */
-    int sel=0;
+    int sel = 0;
     while (1)
     {
-        flag++;
         sel++;
-        if (flag % 20000 == 0)
+        if (sel % 20000 == 0)
         {
-            logString(strs[sel%3]);
+
+            logString(bufdes);
+            CopyViaDMA2(bufdes, strs[(sel / 20000) % 3], 1024);
         }
     };
 }

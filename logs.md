@@ -1,6 +1,12 @@
 
 # logs
 
+#### Thu Jul 18 11:54:10 PM CST 2024
+Implement a "Memory to Memory" data copy function by DMA.
+It's meaningless as even though DMA do not cost cpu , I still need to spend cpu on wait for the finish if I need to know when the transfer is finished.
+Maybe DMA is useful for some scenarios that I don't care about the finish of the tranfer.
+Maybe I can use use the DMA to re-implement the USART1 log
+
 #### Tue Jul 16 10:19:33 PM CST 2024
 Implement a simple mechanism to log string via USART1       
 
