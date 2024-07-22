@@ -75,3 +75,8 @@ uint32_t Strlen(const char *src);
  * @param size
  */
 void Memcpy(char *dst, const char *src, uint32_t size);
+/**
+ * @brief Config DMA2 Stream7 for Memory to Peripheral DMA transfer.
+ *
+ */
+void initDMA2S7ForM2P();

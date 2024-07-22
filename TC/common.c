@@ -83,7 +83,8 @@ void initUSART1()
     // the num in BRR should be like 8.6805(16000000/115200/16)
     // So the Mantissa should be 0d8,and Fraction should be 11 (11/16)
     USART1->BRR = 0x8B;
-    // ENABLE USART ,transmitter,interuption for TXE
+    USART1->CR3 |= (1 << 7); // Enable DMA mode
+    //  ENABLE USART ,transmitter,interuption for TXE
     USART1->CR1 |= USART_CR1_TXEIE | USART_CR1_UE | USART_CR1_TE;
 }
 void Memcpy(char *dst, const char *src, uint32_t size)
@@ -104,16 +105,19 @@ void logBuf(const char *msg, uint32_t len)
 {
     if (len == 0 || msg == NULL)
         return;
-    HAL_NVIC_DisableIRQ(USART1_IRQn);
     buf[0] = '\r';
     buf[1] = '\n';
     if (len > sizeof(buf) - 2)
         len = sizeof(buf) - 2;
-    Memcpy(buf + 2, msg, len);
 
     buflen = len + 2;
-    idx = 0;
-    HAL_NVIC_EnableIRQ(USART1_IRQn);
+    Memcpy(buf + 2, msg, len);   // copy data to send buffer
+    while (DMA2_Stream7->CR & 1) // wait for unfinished transfer
+        ;
+    DMA2_Stream7->M0AR = (uint32_t)buf;            // setup src address
+    DMA2_Stream7->NDTR = buflen;                   // setup data len
+    DMA2_Stream7->PAR = (uint32_t)(&(USART1->DR)); // set DR of USART1 as dest
+    DMA2_Stream7->CR |= 1;                         // Start transfer
 }
 void logString(const char *msg)
 {
@@ -143,6 +147,18 @@ void initDMA2S1ForM2M()
     DMA2_Stream1->CR = setBits(DMA2_Stream1->CR, 11, 2, 0); // souce Memory Address increases by byte
     DMA2_Stream1->CR = setBits(DMA2_Stream1->CR, 4, 1, 1);  // enable interrupt for transfer complete
 }
+void initDMA2S7ForM2P()
+{
+    RCC->AHB1ENR |= RCC_AHB1ENR_DMA2EN;      // Enable DMA2
+    DMAStreamSelectChannel(DMA2_Stream7, 4); // select channel
+    DMAStreamSetDirection(DMA2_Stream7, 1);  // set direction "Memory-to-peripheral"
+
+    DMA2_Stream7->CR = setBits(DMA2_Stream7->CR, 10, 1, 1); // Src Memory Address increases
+    DMA2_Stream7->CR = setBits(DMA2_Stream7->CR, 9, 1, 0);  // dest Memory Address increases
+    DMA2_Stream7->CR = setBits(DMA2_Stream7->CR, 13, 2, 0); // Src Memory Address increases by byte
+    DMA2_Stream7->CR = setBits(DMA2_Stream7->CR, 4, 1, 1);  // enable interrupt for transfer complete
+    NVIC_EnableIRQ(DMA2_Stream7_IRQn);                      // enable IRQN
+}
 void DMA2_Stream1_IRQHandler()
 {
     // Clear flag of transfer complete when A DMA finish
@@ -152,7 +168,17 @@ void DMA2_Stream1_IRQHandler()
         DMA2->LIFCR |= 1 << 11;
     }
 }
-
+/**
+ * @brief IRQHandler for interrupt of  DMA2_Stream7
+ *
+ */
+void DMA2_Stream7_IRQHandler()
+{
+    if (DMA2->HISR & (1 << 27))
+    {
+        DMA2->HIFCR |= 1 << 27;
+    }
+}
 void CopyViaDMA2(uint8_t *dst, const uint8_t *s, uint16_t size)
 {
     // wait for uncompleted tranfer

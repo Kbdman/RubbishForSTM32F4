@@ -89,11 +89,11 @@ int main()
     InitPG6();
     setupMCO2();
     initUSART1();
-    initDMA2S1ForM2M();
-    //  InitEXTI();
-    //  initNVIC();
-    //  HAL_SYSTICK_Config(SystemCoreClock/20);
-    //  HAL_NVIC_EnableIRQ(SysTick_IRQn);
+    initDMA2S7ForM2P();
+    //   InitEXTI();
+    //   initNVIC();
+    //   HAL_SYSTICK_Config(SystemCoreClock/20);
+    //   HAL_NVIC_EnableIRQ(SysTick_IRQn);
     /*
 
 
@@ -115,11 +115,10 @@ int main()
     while (1)
     {
         sel++;
-        if (sel % 20000 == 0)
+        if (sel % 20 == 0)
         {
 
-            logString(bufdes);
-            CopyViaDMA2(bufdes, strs[(sel / 20000) % 3], 1024);
+            logString(strs[(sel / 20000) % 3]);
         }
     };
 }

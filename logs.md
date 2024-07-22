@@ -1,6 +1,10 @@
 
 # logs
 
+#### Mon Jul 22 11:19:55 PM CST 2024
+Re-implement log function with DMA mode USART1      
+To setup DMA mode USART, both USART and DMA  should be well configured by setup registers
+
 #### Thu Jul 18 11:54:10 PM CST 2024
 Implement a "Memory to Memory" data copy function by DMA.
 It's meaningless as even though DMA do not cost cpu , I still need to spend cpu on wait for the finish if I need to know when the transfer is finished.
