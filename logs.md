@@ -1,7 +1,7 @@
 
 # logs
 #### Thu Jul 25 2024
-It starts to be boring to learn peripheral. I decide after I finished demo for CAN SPI and IIC. I will stop learning peripherals interfaces.
+It starts to be boring to learn peripherals. I decide to stop learning peripherals interfaces after I finishing demos for CAN SPI and IIC.            
 Maybe it will be time to start port freertos on my board
 
 #### Mon Jul 22 11:19:55 PM CST 2024
