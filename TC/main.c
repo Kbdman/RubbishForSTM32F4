@@ -3,6 +3,7 @@
 #include "system_stm32f4xx.h"
 #include CMSIS_device_header
 #include "common.h"
+#include "can.h"
 int i = 0x256;
 int flag = 0;
 const char *strs[3] = {"This is the first string",
@@ -83,13 +84,14 @@ void setupMCO2()
 char bufdes[1024] = {0};
 int main()
 {
-
+    SystemCoreClockUpdate();
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOGEN;
     RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
     InitPG6();
     setupMCO2();
     initUSART1();
     initDMA2S7ForM2P();
+    initCan1OnPD();
     //   InitEXTI();
     //   initNVIC();
     //   HAL_SYSTICK_Config(SystemCoreClock/20);
