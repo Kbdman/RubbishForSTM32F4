@@ -1,5 +1,12 @@
 
 # logs
+
+#### Fri Aug  9 12:25:46 AM CST 2024
+Add a function which send can message out by using PD0 PD1 as CAN1 RX TX.
+The CAN interface ce on MCU are controller not transceiver, it can not communicate with can bus.
+A extra transceiver device are needed.
+I hate caculate the braud rate, luckly there are some tools can help.
+
 #### Thu Jul 25 2024
 It starts to be boring to learn peripherals. I decide to stop learning peripherals interfaces after I finishing demos for CAN SPI and IIC.            
 Maybe it will be time to start port freertos on my board
